@@ -1,16 +1,19 @@
 {
-    "routes": [
-        {
-            "origin": "DEL",
-            "destination": "BOM"
-        },
-        {
-            "origin": "BOM",
-            "destination": "DEL"
-        },
-        {
-            "origin": "DEL",
-            "destination": "BLR"
-        }
-    ]
+  "routes": [
+    {"origin": "DEL", "destination": "BOM"},
+    {"origin": "BOM", "destination": "DEL"},
+    {"origin": "DEL", "destination": "BLR"},
+    {"origin": "BLR", "destination": "DEL"},
+    {"origin": "DEL", "destination": "HYD"},
+    {"origin": "HYD", "destination": "DEL"},
+    {"origin": "BOM", "destination": "BLR"},
+    {"origin": "BLR", "destination": "BOM"},
+    {"origin": "DEL", "destination": "MAA"},
+    {"origin": "MAA", "destination": "DEL"},
+    {"origin": "BOM", "destination": "HYD"},
+    {"origin": "HYD", "destination": "BOM"},
+    {"origin": "DEL", "destination": "CCU"},
+    {"origin": "CCU", "destination": "DEL"},
+    {"origin": "BOM", "destination": "MAA"}
+  ]
 }
