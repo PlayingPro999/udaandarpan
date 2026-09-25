@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Airfare Price Index</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        header {
+            background: #1f2937;
+            color: white;
+            padding: 25px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin-bottom: 0;
+            color: #d1d5db;
+        }
+
+        .container {
+            padding: 30px 40px;
+        }
+
+        /* SUMMARY CARDS */
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            box-shadow: 0 2px 8px #00000015;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #555;
+        }
+
+        .card p {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        /* NATIONAL INDEX */
+
+        .national-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px #00000015;
+        }
+
+        .national-section h2 {
+            margin-top: 0;
+        }
+
+        .national-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .national-method {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .national-cards {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .national-card {
+            background: #f4f6f8;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .national-card .window {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .national-card .value {
+            font-size: 26px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* FINAL NATIONAL INDEX */
+
+        .final-card {
+            background: #e5e7eb;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .final-card .label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .final-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        /* ROUTE TABLE */
+
+        .section-header {
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px #00000015;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #e5e7eb;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .window {
+            font-weight: bold;
+        }
+
+        .index {
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .error {
+            color: #b91c1c;
+            padding: 20px;
+            text-align: center;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>Airfare Price Index</h1>
+
+    <p>
+        Real-time airfare monitoring and analytics
+    </p>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- ================================================= -->
+    <!-- SUMMARY CARDS -->
+    <!-- ================================================= -->
+
+    <div class="cards">
+
+        <div class="card">
+
+            <h3>Routes Tracked</h3>
+
+            <p id="routeCount">-</p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Average Fare</h3>
+
+            <p id="averageFare">-</p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Average Route Index</h3>
+
+            <p id="averageIndex">-</p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- NATIONAL INDEX -->
+    <!-- ================================================= -->
+
+    <div class="national-section">
+
+        <h2>
+            National Airfare Price Index
+        </h2>
+
+
+        <p class="national-description">
+
+            Passenger-weighted national airfare index
+            across the tracked domestic routes.
+
+        </p>
+
+
+        <p
+            id="nationalMethod"
+            class="national-method"
+        >
+
+            Method: Loading...
+
+        </p>
+
+
+        <div
+            id="nationalCards"
+            class="national-cards"
+        >
+
+            <div class="loading">
+
+                Loading national index...
+
+            </div>
+
+        </div>
+
+
+        <!-- FINAL NATIONAL INDEX -->
+
+        <div
+            id="finalNational"
+            class="final-card"
+            style="display: none;"
+        >
+
+            <div class="label">
+
+                Final National Index
+
+            </div>
+
+
+            <div
+                id="finalNationalValue"
+                class="value"
+            >
+
+                -
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ROUTE-WISE INDEX -->
+    <!-- ================================================= -->
+
+    <div class="section-header">
+
+        <h2>
+            Route-wise Airfare Index
+        </h2>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Route
+                </th>
+
+                <th>
+                    Booking Window
+                </th>
+
+                <th>
+                    Current Fare
+                </th>
+
+                <th>
+                    Base Fare
+                </th>
+
+                <th>
+                    Index
+                </th>
+
+                <th>
+                    Observations
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="indexTable">
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="loading"
+                >
+
+                    Loading data...
+
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ===================================================== -->
+
+<script>
+
+
+/*
+===========================================================
+LOAD ROUTE INDEX
+===========================================================
+*/
+
+async function loadRouteIndex() {
+
+    const table =
+        document.getElementById(
+            "indexTable"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/index"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        table.innerHTML = "";
+
+
+        /*
+        ---------------------------------------------------
+        No route data
+        ---------------------------------------------------
+        */
+
+        if (data.length === 0) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="loading"
+                    >
+
+                        No route index data available.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            document.getElementById(
+                "routeCount"
+            ).innerText = "0";
+
+
+            document.getElementById(
+                "averageFare"
+            ).innerText = "₹0.00";
+
+
+            document.getElementById(
+                "averageIndex"
+            ).innerText = "0.00";
+
+
+            return;
+
+        }
+
+
+        /*
+        ---------------------------------------------------
+        Count unique routes
+        ---------------------------------------------------
+        */
+
+        const uniqueRoutes =
+            new Set(
+                data.map(
+                    item => item.route
+                )
+            );
+
+
+        document.getElementById(
+            "routeCount"
+        ).innerText =
+            uniqueRoutes.size;
+
+
+        /*
+        ---------------------------------------------------
+        Calculate average fare and index
+        ---------------------------------------------------
+        */
+
+        let totalFare = 0;
+
+        let totalIndex = 0;
+
+
+        /*
+        ---------------------------------------------------
+        Display route rows
+        ---------------------------------------------------
+        */
+
+        data.forEach(route => {
+
+
+            totalFare +=
+                Number(
+                    route.current_fare
+                );
+
+
+            totalIndex +=
+                Number(
+                    route.index
+                );
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${route.route}
+                </td>
+
+
+                <td class="window">
+                    ${route.booking_window}
+                </td>
+
+
+                <td>
+                    ₹${Number(
+                        route.current_fare
+                    ).toFixed(2)}
+                </td>
+
+
+                <td>
+                    ₹${Number(
+                        route.base_fare
+                    ).toFixed(2)}
+                </td>
+
+
+                <td class="index">
+                    ${Number(
+                        route.index
+                    ).toFixed(2)}
+                </td>
+
+
+                <td>
+                    ${route.observations}
+                </td>
+
+            `;
+
+
+            table.appendChild(
+                row
+            );
+
+        });
+
+
+        /*
+        ---------------------------------------------------
+        Summary calculations
+        ---------------------------------------------------
+        */
+
+        document.getElementById(
+            "averageFare"
+        ).innerText =
+
+            "₹" +
+
+            (
+                totalFare /
+                data.length
+            ).toFixed(2);
+
+
+        document.getElementById(
+            "averageIndex"
+        ).innerText =
+
+            (
+                totalIndex /
+                data.length
+            ).toFixed(2);
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Route index error:",
+            error
+        );
+
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="error"
+                >
+
+                    Failed to load route index.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+/*
+===========================================================
+LOAD NATIONAL INDEX
+===========================================================
+*/
+
+async function loadNationalIndex() {
+
+    const container =
+        document.getElementById(
+            "nationalCards"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/national-index"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        /*
+        ---------------------------------------------------
+        Display methodology
+        ---------------------------------------------------
+        */
+
+        document.getElementById(
+            "nationalMethod"
+        ).innerText =
+
+            "Method: " +
+            result.method;
+
+
+        /*
+        ---------------------------------------------------
+        Get national indices
+        ---------------------------------------------------
+        */
+
+        const data =
+            result.national_indices || [];
+
+
+        container.innerHTML = "";
+
+
+        /*
+        ---------------------------------------------------
+        No national data
+        ---------------------------------------------------
+        */
+
+        if (data.length === 0) {
+
+            container.innerHTML = `
+
+                <div class="loading">
+
+                    No national index data available.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        /*
+        ---------------------------------------------------
+        Display each booking window
+        ---------------------------------------------------
+        */
+
+        data.forEach(item => {
+
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "national-card";
+
+
+            card.innerHTML = `
+
+                <div class="window">
+
+                    ${item.booking_window}
+
+                </div>
+
+
+                <div class="value">
+
+                    ${Number(
+                        item.national_index
+                    ).toFixed(2)}
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                card
+            );
+
+        });
+
+
+        /*
+        ---------------------------------------------------
+        Display final national index
+        ---------------------------------------------------
+        */
+
+        if (
+            result.final_index !== null &&
+            result.final_index !== undefined
+        ) {
+
+            document.getElementById(
+                "finalNational"
+            ).style.display =
+                "block";
+
+
+            document.getElementById(
+                "finalNationalValue"
+            ).innerText =
+
+                Number(
+                    result.final_index
+                ).toFixed(2);
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "National index error:",
+            error
+        );
+
+
+        document.getElementById(
+            "nationalMethod"
+        ).innerText =
+            "Method: Unable to load";
+
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Failed to load national index.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/*
+===========================================================
+START DASHBOARD
+===========================================================
+*/
+
+loadRouteIndex();
+
+loadNationalIndex();
+
+
+</script>
+
+
+</body>
+
+</html>

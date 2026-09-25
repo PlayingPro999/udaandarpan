@@ -1,0 +1,16 @@
+{
+    "routes": [
+        {
+            "origin": "DEL",
+            "destination": "BOM"
+        },
+        {
+            "origin": "BOM",
+            "destination": "DEL"
+        },
+        {
+            "origin": "DEL",
+            "destination": "BLR"
+        }
+    ]
+}
