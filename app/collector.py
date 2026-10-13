@@ -3,6 +3,7 @@ import requests
 
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 API_KEY = os.getenv("IGNAV_API_KEY")
@@ -15,6 +16,9 @@ def collect_fares(
     destination,
     departure_date
 ):
+
+    if hasattr(departure_date, "isoformat"):
+        departure_date = departure_date.isoformat()
 
     response = requests.post(
         f"{BASE_URL}/fares/one-way",
@@ -49,7 +53,6 @@ def collect_fares(
 
         fares.append({
 
-            # Basic information
             "source": "Ignav",
 
             "origin": first_segment["departure_airport"],
@@ -66,7 +69,6 @@ def collect_fares(
 
             "departure_date": departure_date,
 
-            # Times
             "departure_time": first_segment.get(
                 "departure_time_local"
             ),
@@ -75,12 +77,10 @@ def collect_fares(
                 "arrival_time_local"
             ),
 
-            # Duration
             "duration_minutes": outbound.get(
                 "duration_minutes"
             ),
 
-            # Flight characteristics
             "cabin": itinerary.get(
                 "cabin_class",
                 "Economy"
@@ -92,7 +92,6 @@ def collect_fares(
                 "aircraft"
             ),
 
-            # Price
             "fare": float(
                 itinerary["price"]["amount"]
             ),
@@ -106,7 +105,6 @@ def collect_fares(
                 "status"
             ),
 
-            # Baggage
             "checked_bags": itinerary.get(
                 "bags",
                 {}
@@ -114,18 +112,15 @@ def collect_fares(
                 "checked"
             ),
 
-            # Transfer
             "requires_self_transfer": itinerary.get(
                 "requires_self_transfer",
                 False
             ),
 
-            # Ignav identifier
             "ignav_id": itinerary.get(
                 "ignav_id"
             ),
 
-            # Preserve complete itinerary
             "raw_data": itinerary
         })
 

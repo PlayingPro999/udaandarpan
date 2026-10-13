@@ -1,51 +1,55 @@
+
 import json
 from pathlib import Path
 
 from app.db_config import get_connection
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASELINES_FILE = BASE_DIR / "config" / "baselines.json"
 
 
 def setup_baselines():
-
-    with open(
-        BASELINES_FILE,
-        "r",
-        encoding="utf-8"
-    ) as file:
+    with BASELINES_FILE.open("r", encoding="utf-8") as file:
         config = json.load(file)
 
     conn = get_connection()
-    cursor = conn.cursor()
 
-    for route in config["routes"]:
+    try:
+        with conn.cursor() as cursor:
+            for route in config["routes"]:
+                origin = route["origin"].upper()
+                destination = route["destination"].upper()
+                base_fare = route["base_fare"]
+                base_date = route["base_date"]
 
-        cursor.execute("""
-            INSERT INTO route_baselines
-            (
-                origin,
-                destination,
-                base_fare,
-                base_date
-            )
-            VALUES (%s, %s, %s, %s)
+                cursor.execute(
+                    """
+                    UPDATE route_baselines
+                    SET base_fare = %s, base_date = %s
+                    WHERE origin = %s AND destination = %s
+                    """,
+                    (base_fare, base_date, origin, destination),
+                )
 
-            ON CONFLICT DO NOTHING
-        """, (
-            route["origin"],
-            route["destination"],
-            route["base_fare"],
-            route["base_date"]
-        ))
+                if cursor.rowcount == 0:
+                    cursor.execute(
+                        """
+                        INSERT INTO route_baselines
+                            (origin, destination, base_fare, base_date)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        (origin, destination, base_fare, base_date),
+                    )
 
-    conn.commit()
+        conn.commit()
+        print("Route baselines loaded successfully.")
 
-    cursor.close()
-    conn.close()
+    except Exception:
+        conn.rollback()
+        raise
 
-    print("Route baselines loaded successfully.")
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":

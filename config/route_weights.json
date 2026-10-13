@@ -1,21 +1,81 @@
 {
-    "source": "DGCA",
-    "period": "2024-25",
-    "routes": [
-        {
-            "origin": "DEL",
-            "destination": "BOM",
-            "passenger_count": 3426228
-        },
-        {
-            "origin": "BOM",
-            "destination": "DEL",
-            "passenger_count": 3424641
-        },
-        {
-            "origin": "DEL",
-            "destination": "BLR",
-            "passenger_count": 2331024
-        }
-    ]
+  "source": "DGCA",
+  "period": "2024-25",
+  "routes": [
+    {
+      "origin": "DEL",
+      "destination": "BOM",
+      "passenger_count": 3426228
+    },
+    {
+      "origin": "BOM",
+      "destination": "DEL",
+      "passenger_count": 3424641
+    },
+    {
+      "origin": "DEL",
+      "destination": "BLR",
+      "passenger_count": 2350018
+    },
+    {
+      "origin": "BLR",
+      "destination": "DEL",
+      "passenger_count": 2331024
+    },
+    {
+      "origin": "DEL",
+      "destination": "HYD",
+      "passenger_count": 1638188
+    },
+    {
+      "origin": "HYD",
+      "destination": "DEL",
+      "passenger_count": 1657730
+    },
+    {
+      "origin": "BOM",
+      "destination": "BLR",
+      "passenger_count": 2083737
+    },
+    {
+      "origin": "BLR",
+      "destination": "BOM",
+      "passenger_count": 2030837
+    },
+    {
+      "origin": "DEL",
+      "destination": "MAA",
+      "passenger_count": 1230642
+    },
+    {
+      "origin": "MAA",
+      "destination": "DEL",
+      "passenger_count": 1222119
+    },
+    {
+      "origin": "BOM",
+      "destination": "HYD",
+      "passenger_count": 1186691
+    },
+    {
+      "origin": "HYD",
+      "destination": "BOM",
+      "passenger_count": 1166588
+    },
+    {
+      "origin": "DEL",
+      "destination": "CCU",
+      "passenger_count": 1417339
+    },
+    {
+      "origin": "CCU",
+      "destination": "DEL",
+      "passenger_count": 1353047
+    },
+    {
+      "origin": "BOM",
+      "destination": "MAA",
+      "passenger_count": 1046438
+    }
+  ]
 }

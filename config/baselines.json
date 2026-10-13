@@ -1,22 +1,94 @@
 {
-    "routes": [
-        {
-            "origin": "DEL",
-            "destination": "BOM",
-            "base_fare": 5000,
-            "base_date": "2026-09-01"
-        },
-        {
-            "origin": "DEL",
-            "destination": "BLR",
-            "base_fare": 5500,
-            "base_date": "2026-09-01"
-        },
-        {
-            "origin": "BOM",
-            "destination": "DEL",
-            "base_fare": 4800,
-            "base_date": "2026-09-01"
-        }
-    ]
+  "routes": [
+    {
+      "origin": "DEL",
+      "destination": "BOM",
+      "base_fare": 5000,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "BOM",
+      "destination": "DEL",
+      "base_fare": 4800,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "DEL",
+      "destination": "BLR",
+      "base_fare": 5500,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "BLR",
+      "destination": "DEL",
+      "base_fare": 5300,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "DEL",
+      "destination": "HYD",
+      "base_fare": 5000,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "HYD",
+      "destination": "DEL",
+      "base_fare": 4800,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "BOM",
+      "destination": "BLR",
+      "base_fare": 4500,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "BLR",
+      "destination": "BOM",
+      "base_fare": 4500,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "DEL",
+      "destination": "MAA",
+      "base_fare": 5500,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "MAA",
+      "destination": "DEL",
+      "base_fare": 5300,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "BOM",
+      "destination": "HYD",
+      "base_fare": 4500,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "HYD",
+      "destination": "BOM",
+      "base_fare": 4300,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "DEL",
+      "destination": "CCU",
+      "base_fare": 5000,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "CCU",
+      "destination": "DEL",
+      "base_fare": 4800,
+      "base_date": "2026-09-01"
+    },
+    {
+      "origin": "BOM",
+      "destination": "MAA",
+      "base_fare": 5000,
+      "base_date": "2026-09-01"
+    }
+  ]
 }

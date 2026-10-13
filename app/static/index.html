@@ -1,7 +1,12 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Airfare Price Index</title>
 
@@ -33,8 +38,6 @@
             padding: 30px 40px;
         }
 
-        /* SUMMARY CARDS */
-
         .cards {
             display: flex;
             gap: 20px;
@@ -59,8 +62,6 @@
             font-weight: bold;
             margin-bottom: 0;
         }
-
-        /* NATIONAL INDEX */
 
         .national-section {
             background: white;
@@ -111,8 +112,6 @@
             margin-top: 10px;
         }
 
-        /* FINAL NATIONAL INDEX */
-
         .final-card {
             background: #e5e7eb;
             padding: 25px;
@@ -132,10 +131,12 @@
             margin-top: 8px;
         }
 
-        /* ROUTE TABLE */
-
         .section-header {
             margin-bottom: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
         }
 
         table {
@@ -181,6 +182,35 @@
             text-align: center;
         }
 
+        .status {
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 8px;
+            color: #666;
+            box-shadow: 0 2px 8px #00000010;
+        }
+
+        @media (max-width: 800px) {
+
+            .container {
+                padding: 20px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .cards {
+                flex-direction: column;
+            }
+
+            table {
+                min-width: 800px;
+            }
+
+        }
+
     </style>
 
 </head>
@@ -203,9 +233,17 @@
 <div class="container">
 
 
-    <!-- ================================================= -->
+    <!-- STATUS -->
+
+    <div
+        id="status"
+        class="status"
+    >
+        Loading airfare data...
+    </div>
+
+
     <!-- SUMMARY CARDS -->
-    <!-- ================================================= -->
 
     <div class="cards">
 
@@ -238,9 +276,7 @@
     </div>
 
 
-    <!-- ================================================= -->
     <!-- NATIONAL INDEX -->
-    <!-- ================================================= -->
 
     <div class="national-section">
 
@@ -261,9 +297,7 @@
             id="nationalMethod"
             class="national-method"
         >
-
             Method: Loading...
-
         </p>
 
 
@@ -273,15 +307,11 @@
         >
 
             <div class="loading">
-
                 Loading national index...
-
             </div>
 
         </div>
 
-
-        <!-- FINAL NATIONAL INDEX -->
 
         <div
             id="finalNational"
@@ -290,9 +320,7 @@
         >
 
             <div class="label">
-
                 Final National Index
-
             </div>
 
 
@@ -300,9 +328,7 @@
                 id="finalNationalValue"
                 class="value"
             >
-
                 -
-
             </div>
 
         </div>
@@ -310,9 +336,7 @@
     </div>
 
 
-    <!-- ================================================= -->
-    <!-- ROUTE-WISE INDEX -->
-    <!-- ================================================= -->
+    <!-- ROUTE INDEX -->
 
     <div class="section-header">
 
@@ -323,69 +347,115 @@
     </div>
 
 
-    <table>
+    <div class="table-container">
 
-        <thead>
+        <table>
 
-            <tr>
+            <thead>
 
-                <th>
-                    Route
-                </th>
+                <tr>
 
-                <th>
-                    Booking Window
-                </th>
+                    <th>
+                        Route
+                    </th>
 
-                <th>
-                    Current Fare
-                </th>
+                    <th>
+                        Booking Window
+                    </th>
 
-                <th>
-                    Base Fare
-                </th>
+                    <th>
+                        Current Fare
+                    </th>
 
-                <th>
-                    Index
-                </th>
+                    <th>
+                        Base Fare
+                    </th>
 
-                <th>
-                    Observations
-                </th>
+                    <th>
+                        Index
+                    </th>
 
-            </tr>
+                    <th>
+                        Observations
+                    </th>
 
-        </thead>
+                </tr>
+
+            </thead>
 
 
-        <tbody id="indexTable">
+            <tbody id="indexTable">
 
-            <tr>
+                <tr>
 
-                <td
-                    colspan="6"
-                    class="loading"
-                >
+                    <td
+                        colspan="6"
+                        class="loading"
+                    >
+                        Loading data...
+                    </td>
 
-                    Loading data...
+                </tr>
 
-                </td>
+            </tbody>
 
-            </tr>
+        </table>
 
-        </tbody>
-
-    </table>
+    </div>
 
 
 </div>
 
 
-<!-- ===================================================== -->
-<!-- JAVASCRIPT -->
-<!-- ===================================================== -->
-
 <script>
+
+
+/*
+===========================================================
+HELPER FUNCTIONS
+===========================================================
+*/
+
+function formatMoney(value) {
+
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "—";
+    }
+
+    return "₹" + number.toFixed(2);
+
+}
+
+
+function formatNumber(value) {
+
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "—";
+    }
+
+    return number.toFixed(2);
+
+}
+
+
+function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
 
 
 /*
@@ -397,24 +467,23 @@ LOAD ROUTE INDEX
 async function loadRouteIndex() {
 
     const table =
-        document.getElementById(
-            "indexTable"
-        );
+        document.getElementById("indexTable");
 
+    const status =
+        document.getElementById("status");
 
     try {
 
         const response =
-            await fetch(
-                "/index"
-            );
+            await fetch("/index", {
+                cache: "no-store"
+            });
 
 
         if (!response.ok) {
 
             throw new Error(
-                "HTTP " +
-                response.status
+                "HTTP " + response.status
             );
 
         }
@@ -424,12 +493,24 @@ async function loadRouteIndex() {
             await response.json();
 
 
+        console.log("Route index API:", data);
+
+
+        if (!Array.isArray(data)) {
+
+            throw new Error(
+                "Unexpected /index response"
+            );
+
+        }
+
+
         table.innerHTML = "";
 
 
         /*
         ---------------------------------------------------
-        No route data
+        NO DATA
         ---------------------------------------------------
         */
 
@@ -468,6 +549,9 @@ async function loadRouteIndex() {
             ).innerText = "0.00";
 
 
+            status.innerText =
+                "No route index data is currently available.";
+
             return;
 
         }
@@ -475,15 +559,15 @@ async function loadRouteIndex() {
 
         /*
         ---------------------------------------------------
-        Count unique routes
+        UNIQUE ROUTES
         ---------------------------------------------------
         */
 
         const uniqueRoutes =
             new Set(
-                data.map(
-                    item => item.route
-                )
+                data
+                    .map(item => item.route)
+                    .filter(Boolean)
             );
 
 
@@ -495,92 +579,121 @@ async function loadRouteIndex() {
 
         /*
         ---------------------------------------------------
-        Calculate average fare and index
+        AVERAGES
         ---------------------------------------------------
         */
 
         let totalFare = 0;
+        let fareCount = 0;
 
         let totalIndex = 0;
+        let indexCount = 0;
 
 
         /*
         ---------------------------------------------------
-        Display route rows
+        TABLE
         ---------------------------------------------------
         */
 
         data.forEach(route => {
 
+            const currentFare =
+                Number(route.current_fare);
 
-            totalFare +=
-                Number(
-                    route.current_fare
-                );
+            const baseFare =
+                Number(route.base_fare);
+
+            const routeIndex =
+                Number(route.index);
 
 
-            totalIndex +=
-                Number(
-                    route.index
-                );
+            if (Number.isFinite(currentFare)) {
+
+                totalFare += currentFare;
+                fareCount++;
+
+            }
+
+
+            if (Number.isFinite(routeIndex)) {
+
+                totalIndex += routeIndex;
+                indexCount++;
+
+            }
 
 
             const row =
-                document.createElement(
-                    "tr"
-                );
+                document.createElement("tr");
+
+
+            /*
+            IMPORTANT:
+            Backend currently returns
+            current_observations, NOT observations.
+            */
+
+            const observations =
+                route.current_observations ??
+                route.observations ??
+                "—";
 
 
             row.innerHTML = `
 
                 <td>
-                    ${route.route}
+                    ${escapeHtml(
+                        route.route ?? "—"
+                    )}
                 </td>
 
 
                 <td class="window">
-                    ${route.booking_window}
+                    ${escapeHtml(
+                        route.booking_window ?? "—"
+                    )}
                 </td>
 
 
                 <td>
-                    ₹${Number(
-                        route.current_fare
-                    ).toFixed(2)}
+                    ${formatMoney(
+                        currentFare
+                    )}
                 </td>
 
 
                 <td>
-                    ₹${Number(
-                        route.base_fare
-                    ).toFixed(2)}
+                    ${formatMoney(
+                        baseFare
+                    )}
                 </td>
 
 
                 <td class="index">
-                    ${Number(
-                        route.index
-                    ).toFixed(2)}
+                    ${formatNumber(
+                        routeIndex
+                    )}
                 </td>
 
 
                 <td>
-                    ${route.observations}
+                    ${escapeHtml(
+                        observations
+                    )}
                 </td>
 
             `;
 
 
-            table.appendChild(
-                row
-            );
+            table.appendChild(row);
 
         });
 
 
         /*
         ---------------------------------------------------
-        Summary calculations
+        SUMMARY
         ---------------------------------------------------
         */
 
@@ -588,22 +701,26 @@ async function loadRouteIndex() {
             "averageFare"
         ).innerText =
 
-            "₹" +
-
-            (
-                totalFare /
-                data.length
-            ).toFixed(2);
+            fareCount > 0
+                ? formatMoney(
+                    totalFare / fareCount
+                )
+                : "—";
 
 
         document.getElementById(
             "averageIndex"
         ).innerText =
 
-            (
-                totalIndex /
-                data.length
-            ).toFixed(2);
+            indexCount > 0
+                ? formatNumber(
+                    totalIndex / indexCount
+                )
+                : "—";
+
+
+        status.innerText =
+            "Route index data loaded successfully.";
 
 
     }
@@ -633,6 +750,25 @@ async function loadRouteIndex() {
 
         `;
 
+
+        document.getElementById(
+            "routeCount"
+        ).innerText = "—";
+
+
+        document.getElementById(
+            "averageFare"
+        ).innerText = "—";
+
+
+        document.getElementById(
+            "averageIndex"
+        ).innerText = "—";
+
+
+        status.innerText =
+            "Unable to load route index data.";
+
     }
 
 }
@@ -656,15 +792,17 @@ async function loadNationalIndex() {
 
         const response =
             await fetch(
-                "/national-index"
+                "/national-index",
+                {
+                    cache: "no-store"
+                }
             );
 
 
         if (!response.ok) {
 
             throw new Error(
-                "HTTP " +
-                response.status
+                "HTTP " + response.status
             );
 
         }
@@ -674,9 +812,15 @@ async function loadNationalIndex() {
             await response.json();
 
 
+        console.log(
+            "National index API:",
+            result
+        );
+
+
         /*
         ---------------------------------------------------
-        Display methodology
+        METHOD
         ---------------------------------------------------
         */
 
@@ -685,17 +829,24 @@ async function loadNationalIndex() {
         ).innerText =
 
             "Method: " +
-            result.method;
+            (
+                result.method ||
+                "Not available"
+            );
 
 
         /*
         ---------------------------------------------------
-        Get national indices
+        DATA
         ---------------------------------------------------
         */
 
         const data =
-            result.national_indices || [];
+            Array.isArray(
+                result.national_indices
+            )
+                ? result.national_indices
+                : [];
 
 
         container.innerHTML = "";
@@ -703,7 +854,7 @@ async function loadNationalIndex() {
 
         /*
         ---------------------------------------------------
-        No national data
+        NO DATA
         ---------------------------------------------------
         */
 
@@ -726,12 +877,11 @@ async function loadNationalIndex() {
 
         /*
         ---------------------------------------------------
-        Display each booking window
+        BOOKING WINDOWS
         ---------------------------------------------------
         */
 
         data.forEach(item => {
-
 
             const card =
                 document.createElement(
@@ -747,39 +897,40 @@ async function loadNationalIndex() {
 
                 <div class="window">
 
-                    ${item.booking_window}
+                    ${escapeHtml(
+                        item.booking_window ?? "—"
+                    )}
 
                 </div>
 
 
                 <div class="value">
 
-                    ${Number(
+                    ${formatNumber(
                         item.national_index
-                    ).toFixed(2)}
+                    )}
 
                 </div>
 
             `;
 
 
-            container.appendChild(
-                card
-            );
+            container.appendChild(card);
 
         });
 
 
         /*
         ---------------------------------------------------
-        Display final national index
+        FINAL NATIONAL INDEX
         ---------------------------------------------------
         */
 
-        if (
-            result.final_index !== null &&
-            result.final_index !== undefined
-        ) {
+        const finalIndex =
+            Number(result.final_index);
+
+
+        if (Number.isFinite(finalIndex)) {
 
             document.getElementById(
                 "finalNational"
@@ -790,12 +941,10 @@ async function loadNationalIndex() {
             document.getElementById(
                 "finalNationalValue"
             ).innerText =
-
-                Number(
-                    result.final_index
-                ).toFixed(2);
+                finalIndex.toFixed(2);
 
         }
+
 
     }
 

@@ -70,7 +70,8 @@ def normalize_fare(raw):
             "Economy"
         ).strip(),
 
-        "stops": int(raw.get("stops", 0)),
+        # FIX: Playwright calendar can return None
+        "stops": int(raw.get("stops") or 0),
 
         "fare": float(raw["fare"]),
 

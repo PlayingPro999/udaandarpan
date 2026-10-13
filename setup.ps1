@@ -6,245 +6,186 @@ Write-Host "       UDAANDARPAN PROJECT SETUP"
 Write-Host "====================================="
 Write-Host ""
 
-# --------------------------------------------------
 # 1. Check Python
-# --------------------------------------------------
-
 Write-Host "Checking Python..."
 
-python --version
-
-if ($LASTEXITCODE -ne 0) {
+try {
+    python --version
+    if ($LASTEXITCODE -ne 0) {
+        throw "Python is not installed or not in PATH."
+    }
+}
+catch {
     Write-Host "ERROR: Python is not installed or not in PATH."
     exit 1
 }
 
-# --------------------------------------------------
 # 2. Create virtual environment
-# --------------------------------------------------
-
 if (!(Test-Path ".\venv")) {
-
     Write-Host "Creating virtual environment..."
-
     python -m venv venv
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: Could not create virtual environment."
         exit 1
     }
-
-} else {
-
+}
+else {
     Write-Host "Virtual environment already exists."
-
 }
 
-# --------------------------------------------------
-# 3. Activate virtual environment
-# --------------------------------------------------
+# 3. Use venv Python directly
+# This avoids PowerShell execution-policy problems with Activate.ps1.
+$pythonExe = Join-Path (Get-Location) "venv\Scripts\python.exe"
 
-Write-Host "Activating virtual environment..."
-
-& ".\venv\Scripts\Activate.ps1"
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: Could not activate virtual environment."
+if (!(Test-Path $pythonExe)) {
+    Write-Host "ERROR: Virtual environment Python was not found."
     exit 1
 }
 
-# --------------------------------------------------
-# 4. Install Python dependencies
-# --------------------------------------------------
-
+# 4. Install dependencies
+Write-Host ""
 Write-Host "Installing project dependencies..."
 
-python -m pip install --upgrade pip
-
+& $pythonExe -m pip install --upgrade pip
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: pip upgrade failed."
     exit 1
 }
 
-pip install -r requirements.txt
-
+& $pythonExe -m pip install -r requirements.txt
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Dependency installation failed."
     exit 1
 }
 
-# --------------------------------------------------
-# 5. Create .env if missing
-# --------------------------------------------------
+# 5. Install Playwright Chromium
+Write-Host ""
+Write-Host "Installing Playwright Chromium..."
 
-if (!(Test-Path ".\.env")) {
-
-    Write-Host "Creating .env from .env.example..."
-
-    Copy-Item ".\.env.example" ".\.env"
-
-    Write-Host ""
-    Write-Host "IMPORTANT:"
-    Write-Host "Open .env and enter:"
-    Write-Host "  IGNAV_API_KEY"
-    Write-Host "  DB_PASSWORD"
-    Write-Host ""
-
-    Read-Host "Press ENTER after editing .env"
-
-} else {
-
-    Write-Host ".env already exists. Keeping existing configuration."
-
+& $pythonExe -m playwright install chromium
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Playwright Chromium installation failed."
+    exit 1
 }
 
-# --------------------------------------------------
-# 6. Find PostgreSQL automatically
-# --------------------------------------------------
+# 6. Configure environment file
+if (!(Test-Path ".\.env")) {
+    if (Test-Path ".\.env.example") {
+        Write-Host "Creating .env from .env.example..."
+        Copy-Item ".\.env.example" ".\.env"
+        Write-Host "Edit .env with your actual API key and database settings."
+        Read-Host "Press ENTER after editing .env"
+    }
+    else {
+        Write-Host "ERROR: .env.example is missing."
+        Write-Host "Create .env.example with the required variable names first."
+        exit 1
+    }
+}
+else {
+    Write-Host ".env already exists. Keeping existing configuration."
+}
 
+# 7. Locate PostgreSQL
+Write-Host ""
 Write-Host "Looking for PostgreSQL..."
 
 $postgresRoot = "C:\Program Files\PostgreSQL"
 
 if (!(Test-Path $postgresRoot)) {
-
-    Write-Host "ERROR: PostgreSQL installation was not found."
+    Write-Host "ERROR: PostgreSQL installation was not found at $postgresRoot."
+    Write-Host "Install PostgreSQL or update this script for your installation path."
     exit 1
-
 }
 
-$postgresInstallations = Get-ChildItem $postgresRoot -Directory -ErrorAction SilentlyContinue |
+$postgresInstallations = @(
+    Get-ChildItem $postgresRoot -Directory -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -match '^\d+$' } |
     Sort-Object { [int]$_.Name } -Descending
+)
 
 if ($postgresInstallations.Count -eq 0) {
-
     Write-Host "ERROR: No PostgreSQL version was found."
     exit 1
-
 }
 
-$postgresVersion = $postgresInstallations[0].Name
-
 $pgBin = Join-Path $postgresInstallations[0].FullName "bin"
-
 $psql = Join-Path $pgBin "psql.exe"
 $pgDump = Join-Path $pgBin "pg_dump.exe"
 $pgRestore = Join-Path $pgBin "pg_restore.exe"
 
-if (!(Test-Path $psql)) {
-
-    Write-Host "ERROR: psql.exe was not found."
-    exit 1
-
+foreach ($exe in @($psql, $pgDump, $pgRestore)) {
+    if (!(Test-Path $exe)) {
+        Write-Host "ERROR: Required PostgreSQL tool not found: $exe"
+        exit 1
+    }
 }
-
-if (!(Test-Path $pgDump)) {
-
-    Write-Host "ERROR: pg_dump.exe was not found."
-    exit 1
-
-}
-
-if (!(Test-Path $pgRestore)) {
-
-    Write-Host "ERROR: pg_restore.exe was not found."
-    exit 1
-
-}
-
-Write-Host ""
-Write-Host "PostgreSQL found:"
-Write-Host "Version: $postgresVersion"
-Write-Host "Path:    $pgBin"
-Write-Host ""
-
-# Make PostgreSQL commands available
-# in the current PowerShell session.
 
 $env:Path = "$pgBin;$env:Path"
 
-# --------------------------------------------------
-# 7. Create/check database
-# --------------------------------------------------
+Write-Host "PostgreSQL tools found at: $pgBin"
 
-Write-Host "Creating/checking database..."
+# 8. Verify database connectivity
+# Database credentials must be configured in .env.
+Write-Host ""
+Write-Host "Checking database setup..."
 
-python -m app.create_database
-
+& $pythonExe -m app.create_database
 if ($LASTEXITCODE -ne 0) {
-
     Write-Host "ERROR: Database creation/check failed."
     exit 1
-
 }
 
-# --------------------------------------------------
-# 8. Create database schema
-# --------------------------------------------------
-
+# 9. Initialize schema
+Write-Host ""
 Write-Host "Creating database schema..."
 
-python -m app.database
-
+& $pythonExe -m app.database
 if ($LASTEXITCODE -ne 0) {
-
     Write-Host "ERROR: Database schema setup failed."
     exit 1
-
 }
 
-# --------------------------------------------------
-# 9. Load route weights
-# --------------------------------------------------
-
+# 10. Load route weights
+Write-Host ""
 Write-Host "Loading route weights..."
 
-python -m app.load_weights
-
+& $pythonExe -m app.load_weights
 if ($LASTEXITCODE -ne 0) {
-
     Write-Host "ERROR: Route weights failed to load."
     exit 1
-
 }
 
-# --------------------------------------------------
-# 10. Load route baselines
-# --------------------------------------------------
-
+# 11. Load route baselines
+Write-Host ""
 Write-Host "Loading route baselines..."
 
-python -m app.setup_baseline
-
+& $pythonExe -m app.setup_baseline
 if ($LASTEXITCODE -ne 0) {
-
     Write-Host "ERROR: Route baselines failed to load."
     exit 1
-
 }
 
-# --------------------------------------------------
-# 11. Finished
-# --------------------------------------------------
-
+# 12. Complete
 Write-Host ""
 Write-Host "====================================="
 Write-Host "          SETUP COMPLETE"
 Write-Host "====================================="
 Write-Host ""
-
+Write-Host "Activate the environment if desired:"
+Write-Host ".\venv\Scripts\Activate.ps1"
+Write-Host ""
 Write-Host "Start API:"
 Write-Host "python -m uvicorn app.main:app --reload"
-
 Write-Host ""
-
 Write-Host "Dashboard:"
 Write-Host "http://127.0.0.1:8000/dashboard"
-
 Write-Host ""
-
 Write-Host "API Docs:"
 Write-Host "http://127.0.0.1:8000/docs"
-
+Write-Host ""
+Write-Host "Collectors:"
+Write-Host "python -m app.run_collection ignav"
+Write-Host "python -m app.run_collection playwright"
 Write-Host ""
